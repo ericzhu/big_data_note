@@ -596,6 +596,31 @@ bin/sstable2json /var/lib/cassandra/data/home_security/activity/home_security-ac
 --------------------------------------------------------------------
 --------------------------------------------------------------------
 
+When data modeling in Cassandra, it is important to understand the implications
+of working with a distributed database versus a relational on
+
+Distributed Database VS Relational Database
+
+The fact that the joins do not exist in Cassandra is perhaps the most significant
+data modeling difference between these two kinds of databases.
+
+Data modeling in Cassandra shall be done in a way that all the data in query is 
+available in one table. In Cassandra, it very often to have many table with
+denormalized data.
+
+In Cassandra data modeling, we shall first ask what queries are needed, then the 
+data model should be accomodated the queries. So that query can be answered by a
+single table.
+
+Data Modeling
+
+1. Relational Database
+	* Data centric
+	  Data Model --> Query
+2. Distributed Database
+	* Query Centrice
+	  Query --> Data modeling
+
 
 
 
