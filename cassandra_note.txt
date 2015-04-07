@@ -1,0 +1,607 @@
+http://http://planetcassandra.org/ --> see use case of cassandra in the industries
+
+cassandra's minimum jdk requirement is JDK7
+cassandra can be installed by tarball or package manager
+
+install cassandra in ~/cassandra --> Just unzip the tar file
+
+
+-----------------------------------------------------------
+-----------------------------------------------------------	
+------------ Main configuration of the cassandra ----------
+-----------------------------------------------------------
+-----------------------------------------------------------
+
+conf/conssandra.yaml		
+This is the main configuration file for cassandra
+
+cluster_name: 'Test Cluster' 	--> when we add node to a cluster, each of the nodes shall have the same cluster name
+num_tokens: 256 -->		--> This goes back to the virtual nodes. This is where we specify the number of token ranges
+				    we want this node to take on.
+partioner: Murmur3Partioner	--> Partioner class applied to partion data
+data_file_directories: 		--> Specify the directories where the data of the database will be stored on this node.
+endpoint_snitch:SimpleSnitch	--> This is fine for cluster located in a single data center. When we set up cluster to 
+				    be spreaded accross multiple data centers, we will be coming in and changing this.
+
+-----------------------------------------------------------
+-----------------------------------------------------------	
+------------ Directories and Permmisions ------------------
+-----------------------------------------------------------
+-----------------------------------------------------------
+
+Create directoris for database data and log on this node
+
+vm1@ubuntu:~$ sudo mkdir /var/lib/cassandra
+vm1@ubuntu:~$ sudo mkdir /var/log/cassandra
+vm1@ubuntu:~$ sudo chown -R $USER:$GROUP /var/lib/cassandra
+vm1@ubuntu:~$ sudo chown -R $USER:$GROUP /var/log/cassandra
+
+
+-----------------------------------------------------------
+-----------------------------------------------------------	
+------------ Run Cassandra --------------------------------
+-----------------------------------------------------------
+-----------------------------------------------------------
+
+--> Run in background mode
+bin/cassandra
+** To stop the cassandra running in background mode, KILL THE PROCESS
+vm1@ubuntu:~$ ps aux | grep cass
+vm1@ubuntu:~$ kill 4070
+
+--> Run in foreground mode
+bin/cassandra -f
+ctrl + c
+
+
+-----------------------------------------------------------
+-----------------------------------------------------------	
+------------ Check the Status of Cassandra Node -----------
+-----------------------------------------------------------
+-----------------------------------------------------------
+
+******************************************************************
+vm1@ubuntu:~/cassandra/apache-cassandra-2.0.7$ bin/nodetool status
+Datacenter: datacenter1
+=======================
+Status=Up/Down
+|/ State=Normal/Leaving/Joining/Moving
+--  Address    Load       Owns (effective)  Host ID                               Token                                    Rack
+UN  127.0.0.1  114.84 KB  100.0%            819d804d-962d-4c7e-9a58-ea569986b1e8  -9189630887145274311                     rack1
+******************************************************************
+check the status of the Cassandra node, use nodetool command
+nodetool has a variaty of subcommands associated with it.
+UN 		--> U means up; N means normal
+Owns: 100% 	--> This node owns 100% of the ring
+Token		--> Token endpoint
+
+
+******************************************************************
+vm1@ubuntu:~/cassandra/apache-cassandra-2.0.7$ bin/nodetool info -h localhost
+Token            : (invoke with -T/--tokens to see all 256 tokens)
+ID               : 819d804d-962d-4c7e-9a58-ea569986b1e8
+Gossip active    : true
+Thrift active    : true
+Native Transport active: true
+Load             : 60.73 KB
+Generation No    : 1428187774
+Uptime (seconds) : 416
+Heap Memory (MB) : 27.57 / 736.00
+Data Center      : datacenter1
+Rack             : rack1
+Exceptions       : 0
+Key Cache        : size 1448 (bytes), capacity 37748736 (bytes), 79 hits, 93 requests, 0.849 recent hit rate, 14400 save period in seconds
+Row Cache        : size 0 (bytes), capacity 0 (bytes), 0 hits, 0 requests, NaN recent hit rate, 0 save period in seconds
+******************************************************************
+
+
+******************************************************************
+vm1@ubuntu:~/cassandra/apache-cassandra-2.0.7$ bin/nodetool ring
+Datacenter: datacenter1
+==========
+Address    Rack        Status State   Load            Owns                Token                                       
+                                                                          9197840687142824546                         
+127.0.0.1  rack1       Up     Normal  60.73 KB        100.00%             -9189630887145274311                        
+127.0.0.1  rack1       Up     Normal  60.73 KB        100.00%             -9159641002290657269                        
+127.0.0.1  rack1       Up     Normal  60.73 KB        100.00%             -9143389757195148765                        
+127.0.0.1  rack1       Up     Normal  60.73 KB        100.00%             -9131309226409931474                        
+127.0.0.1  rack1       Up     Normal  60.73 KB        100.00%             -9018234019495353080                        
+127.0.0.1  rack1       Up     Normal  60.73 KB        100.00%             -8976242856247423818                        
+127.0.0.1  rack1       Up     Normal  60.73 KB        100.00%             -8876089535722195967                        
+127.0.0.1  rack1       Up     Normal  60.73 KB        100.00%             -8805326276127523706 
+******************************************************************
+
+It is refering to the token ring with the token range, because we have only one node, it will
+be responsible for all the tokens. By default, with virtual nodes, each node is responsible for 
+256 token ranges.
+
+In the output of 256 lines, we see the ip address and endpoints of each of the 256 token ranges.
+
+
+-----------------------------------------------------------
+-----------------------------------------------------------	
+------------ System Log and Log Directories- --------------
+-----------------------------------------------------------
+-----------------------------------------------------------
+
+******************************************************************
+vm1@ubuntu:~/cassandra/apache-cassandra-2.0.7$ cat conf/log4j-server.properties 
+# for production, you should probably set pattern to %c instead of %l.  
+# (%l is slower.)
+
+# output messages into a rolling log file as well as stdout
+log4j.rootLogger=INFO,stdout,R
+
+# stdout
+log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+log4j.appender.stdout.layout.ConversionPattern=%5p %d{HH:mm:ss,SSS} %m%n
+
+# rolling log file
+log4j.appender.R=org.apache.log4j.RollingFileAppender
+log4j.appender.R.maxFileSize=20MB
+log4j.appender.R.maxBackupIndex=50
+log4j.appender.R.layout=org.apache.log4j.PatternLayout
+log4j.appender.R.layout.ConversionPattern=%5p [%t] %d{ISO8601} %F (line %L) %m%n
+# Edit the next line to point to your logs directory
+log4j.appender.R.File=/var/log/cassandra/system.log
+
+# Application logging options
+#log4j.logger.org.apache.cassandra=DEBUG
+#log4j.logger.org.apache.cassandra.db=DEBUG
+#log4j.logger.org.apache.cassandra.service.StorageProxy=DEBUG
+
+# Adding this to avoid thrift logging disconnect errors.
+log4j.logger.org.apache.thrift.server.TNonblockingServer=ERROR
+******************************************************************
+
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+------------ Understanding Ways To Communicate With Cassandra ---------------
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+CQL - Cassandra Query Language - a SQL-like query language for communicating
+with Casandra.  
+
+CQL is newish, before CQL we have Thrift. Thrift is a low-level API, currently
+still supported, may be phased out in future relaeases.
+
+There is no joins in CQL, they will perform poorly because of the distributed
+nature of Cassandra.
+
+For administrative activities, such as cluster monitoring and management tasks,
+tools built on JMX are commonly use, such as nodetool.
+
+Tow ways to works with CQL
+--> command line - cqlsh
+--> programming language driver - eg. Java driver library
+
+
+The commands we do have with CQL.
+
+http://www.datastax.com --> to the recent release for the documentation.
+
+
+-----------------------------------------------------------
+-----------------------------------------------------------	
+------------ Using Cqlsh ----------------------------------
+-----------------------------------------------------------
+-----------------------------------------------------------
+
+******************************************************************
+vm1@ubuntu:~/cassandra/apache-cassandra-2.0.7$ bin/cqlsh -C
+Connected to Test Cluster at localhost:9160.
+[cqlsh 4.1.1 | Cassandra 2.0.7 | CQL spec 3.1.1 | Thrift protocol 19.39.0]
+Use HELP for help.
+cqlsh> DESCRIBE Cluster
+
+Cluster: Test Cluster
+Partitioner: Murmur3Partitioner
+Snitch: SimpleSnitch
+******************************************************************
+
+HELP - show all cql command
+******************************************************************
+cqlsh> HELP
+
+Documented shell commands:
+===========================
+CAPTURE      COPY  DESCRIBE  EXPAND  SHOW    TRACING
+CONSISTENCY  DESC  EXIT      HELP    SOURCE
+
+CQL help topics:
+================
+ALTER                        CREATE_TABLE_OPTIONS  SELECT             
+ALTER_ADD                    CREATE_TABLE_TYPES    SELECT_COLUMNFAMILY
+ALTER_ALTER                  CREATE_USER           SELECT_EXPR        
+ALTER_DROP                   DELETE                SELECT_LIMIT       
+ALTER_RENAME                 DELETE_COLUMNS        SELECT_TABLE       
+ALTER_USER                   DELETE_USING          SELECT_WHERE       
+ALTER_WITH                   DELETE_WHERE          TEXT_OUTPUT        
+APPLY                        DROP                  TIMESTAMP_INPUT    
+ASCII_OUTPUT                 DROP_COLUMNFAMILY     TIMESTAMP_OUTPUT   
+BEGIN                        DROP_INDEX            TRUNCATE           
+BLOB_INPUT                   DROP_KEYSPACE         TYPES              
+BOOLEAN_INPUT                DROP_TABLE            UPDATE             
+COMPOUND_PRIMARY_KEYS        DROP_USER             UPDATE_COUNTERS    
+CREATE                       GRANT                 UPDATE_SET         
+CREATE_COLUMNFAMILY          INSERT                UPDATE_USING       
+CREATE_COLUMNFAMILY_OPTIONS  LIST                  UPDATE_WHERE       
+CREATE_COLUMNFAMILY_TYPES    LIST_PERMISSIONS      USE                
+CREATE_INDEX                 LIST_USERS            UUID_INPUT         
+CREATE_KEYSPACE              PERMISSIONS         
+CREATE_TABLE                 REVOKE 
+******************************************************************
+
+Show details and usage documantion of a CQL command
+******************************************************************
+cqlsh> HELP CREATE_KEYSPACE
+
+        CREATE KEYSPACE <ksname>
+            WITH replication = {'class':'<strategy>' [,'<option>':<val>]};
+
+        The CREATE KEYSPACE statement creates a new top-level namespace (aka
+        "keyspace"). Valid names are any string constructed of alphanumeric
+        characters and underscores. Names which do not work as valid
+        identifiers or integers should be quoted as string literals. Properties
+        such as replication strategy and count are specified during creation
+        as key-value pairs in the 'replication' map:
+
+          class [required]: The name of the replication strategy class
+          which should be used for the new keyspace. Some often-used classes
+          are SimpleStrategy and NetworkTopologyStrategy.
+
+          other options [optional]: Most strategies require additional arguments
+          which can be supplied as key-value pairs in the 'replication' map.
+
+        Examples:
+
+          To create a keyspace with NetworkTopologyStrategy and strategy option of "DC1"
+          with a value of "1" and "DC2" with a value of "2" you would use
+          the following statement:
+            CREATE KEYSPACE <ksname>
+                WITH replication = {'class':'NetworkTopologyStrategy', 'DC1':1, 'DC2':2};
+
+         To create a keyspace with SimpleStrategy and "replication_factor" option
+         with a value of "3" you would use this statement:
+            CREATE KEYSPACE <ksname>
+                WITH replication = {'class':'SimpleStrategy', 'replication_factor':3};
+******************************************************************
+
+
+-----------------------------------------------------------
+-----------------------------------------------------------	
+------------ Understanding A Cassandra Database -----------
+-----------------------------------------------------------
+-----------------------------------------------------------
+
+In Cassandra, a database is defined as a keyspace.
+Within the keyspace, tables can be defined.
+
+keyspace -->	table 1
+		table 2
+		table 3
+
+Within a newly installed Cassandra, there are already some keyspaces.
+They are system keyspaces.
+
+List keyspaces in the cluster
+******************************************************************
+cqlsh> DESCRIBE KEYSPACES;
+system  system_traces
+******************************************************************
+
+Show keyspace definition and tables definition
+******************************************************************
+cqlsh> DESCRIBE  KEYSPACE system
+
+CREATE KEYSPACE system WITH replication = {
+  'class': 'LocalStrategy'
+};
+
+USE system;
+
+CREATE TABLE "IndexInfo" (
+  table_name text,
+  index_name text,
+  PRIMARY KEY (table_name, index_name)
+) WITH COMPACT STORAGE AND
+  bloom_filter_fp_chance=0.010000 AND
+  caching='KEYS_ONLY' AND
+  comment='indexes that have been completed' AND
+  dclocal_read_repair_chance=0.000000 AND
+  gc_grace_seconds=0 AND
+  index_interval=128 AND
+  read_repair_chance=0.000000 AND
+  replicate_on_write='true' AND
+  populate_io_cache_on_flush='false' AND
+  default_time_to_live=0 AND
+  speculative_retry='99.0PERCENTILE' AND
+  memtable_flush_period_in_ms=3600000 AND
+  compaction={'class': 'SizeTieredCompactionStrategy'} AND
+  compression={'sstable_compression': 'LZ4Compressor'};
+******************************************************************
+
+
+-----------------------------------------------------------
+-----------------------------------------------------------	
+------------ Defining A Keyspace --------------------------
+-----------------------------------------------------------
+-----------------------------------------------------------
+
+To define a keyspace in Cassandra we need to specifiy 3 things
+
+--> 1. the keyspace name
+--> 2. the keyspace network topologie
+--> 3. the replication factor in each data center
+
+CREATE NAMESPACE vehicle_tracker WITH REPLICATION = 
+{'class': 'NetworkTopologyStrategy', 'dc1': 3, 'dc2': 2}
+
+CREATE NAMESPACE vehicle_tracker WITH REPLICATION = 
+{'class': 'SimpleStrategy', 'replication_factor': 1}
+
+** SimpleStrategy
+** NetworkTopologyStrategy
+
+
+create keyspace -->		CREATE KEYSPACE
+view keyspaces  -->		DESCRIBE KEYSPACES
+view specific keyspace --> 	DESCRIBE KEYSPACE vehicle_tracker
+delete a keyspace -->		DROP KEYSPACE vehicle_tracker
+******************************************************************
+cqlsh> CREATE KEYSPACE vehicle_tracker WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+cqlsh> DESCRIBE KEYSPACES
+system  vehicle_tracker  system_traces
+
+cqlsh> DESCRIBE KEYSPACE vehicle_tracker 
+CREATE KEYSPACE vehicle_tracker WITH replication = {
+  'class': 'SimpleStrategy',
+  'replication_factor': '1'
+};
+
+cqlsh> DROP KEYSPACE vehicle_tracker ;
+cqlsh> DESCRIBE KEYSPACES;
+system  system_traces
+******************************************************************
+
+
+-----------------------------------------------------------
+-----------------------------------------------------------	
+------------ Creating A Table -----------------------------
+-----------------------------------------------------------
+-----------------------------------------------------------
+
+** before create/drop a table, we need to let the Cassandra know 
+   which keyspace we want to work with.
+USE home_security --> choose the keyspace we want to workwith
+
+*** CREATE A TABLE
+CREATE TABLE activity (
+	home_id 	text,
+	datetime	timestamp,
+	event		text,
+	code_used	text,
+	PRIMARY KEY (home_id, datetime)
+) WITH CLUSTERING ORDER BY (datetime DESC)
+
+*** DELETE A TABLE
+DROP TABLE activity
+
+The primary key in Cassandra is for having a way to uniquely identified
+a record in the CQL table. If there is no a column where the value is unique
+accross the table, we can use a compund primary key which includes the values 
+in more than one column.
+
+
+-----------------------------------------------------------
+-----------------------------------------------------------	
+------------ Partition Key in a Table ---------------------
+-----------------------------------------------------------
+-----------------------------------------------------------
+
+Partion Key is hashed by the partitioner to determine which
+node in the cluster will store the partition.
+
+The first column listed in the primary keys is the partition key.
+In our case, it is home_id.
+
+Partion key is required for a table, as the partition key is the
+first column of the primary keys, so which means the primary key
+is mandatory for a table in the Cassandra keyspace.
+
+How the data get saved internally is that, is that all the CQL rows 
+that have the same partion key value are stored in the same partition.
+
+Partition is also called Row Key
+
+Partition --> Row Key
+
+So Partition and RowKey are the same. 
+Partition is the new name; RowKey is the old name
+
+
+-----------------------------------------------------------
+-----------------------------------------------------------	
+------------ Specifying a Decending Clustering Order ------
+-----------------------------------------------------------
+-----------------------------------------------------------
+
+Specifying the descending order causes the writes to take a little 
+longer as cells inserted at the start of the partition, rather than
+add at the end, but improves the read performance when descending
+order is needed by the application.
+
+Although some change on the table, such as add a column, is possible,
+change the clustering order is not an options.
+
+******************************************************************
+cqlsh:home_security> DESCRIBE TABLE activity
+
+CREATE TABLE activity (
+  home_id text,
+  datetime timestamp,
+  code_used text,
+  event text,
+  PRIMARY KEY (home_id, datetime)
+) WITH CLUSTERING ORDER BY (datetime DESC) AND
+  bloom_filter_fp_chance=0.010000 AND
+  caching='KEYS_ONLY' AND
+  comment='' AND
+  dclocal_read_repair_chance=0.000000 AND
+  gc_grace_seconds=864000 AND
+  index_interval=128 AND
+  read_repair_chance=0.100000 AND
+  replicate_on_write='true' AND
+  populate_io_cache_on_flush='false' AND
+  default_time_to_live=0 AND
+  speculative_retry='99.0PERCENTILE' AND
+  memtable_flush_period_in_ms=0 AND
+  compaction={'class': 'SizeTieredCompactionStrategy'} AND
+  compression={'sstable_compression': 'LZ4Compressor'};
+******************************************************************
+
+
+--------------------------------------------------------------------
+--------------------------------------------------------------------	
+------------ Understand Ways to Write Data to Cassandra ------------
+--------------------------------------------------------------------
+--------------------------------------------------------------------
+
+--> COMMAND:	INSERT INTO
+--> COMMAND:	COPY
+		for import csv data into Cassandra
+		or export data out from Cassandra
+--> sstableloader tool
+		it is used to for bulk loading, it stram the sstable file
+		into the cluster. the file needs to be in the sstable format.
+
+** sstable is a file storage unit, how Cassandra stores data in the disk
+
+
+
+INSERT INTO activity (home_id, datetime, event, code_used) 
+VALUES ('H01474777', '2014-05-21 07:32:16', 'alarm set', '5599');
+
+COPY activity (home_id, datetime, event, code_used) FROM '/home/vm1/Desktop/Files/Chapter 7/events.csv' WITH header = true AND delimiter = '|';
+
+bin/sstable2json /var/lib/cassandra/data/home_security/activity/home_security-activity-jb-1-Data.db
+
+
+--------------------------------------------------------------------
+--------------------------------------------------------------------	
+------------ How data is stored internally in Cassandra ------------
+--------------------------------------------------------------------
+--------------------------------------------------------------------
+
+In CQL, a row's primary key value is what makes it unique.
+Internally, a partittion key value (in Thrift, referred to as a row key)
+is what makes an internal storage row unique.
+
+In thrift, a partition is called a "ROW"
+
+|---------------|----------------|---------------|-----------------|
+|-partition key-|----row cell 1--|---row cell 2--|----row cell 2---|	
+|---------------|----------------|---------------|-----------------|
+
+
+Using Cassandra command line (cassandra-cli), we can view the internal storage of
+of partition.
+
+#################################
+All the data in a partition is stored in one row. And the data in that partition
+can not be broken and saved accross different nodes.
+#################################
+
+********************************************************************************
+vm1@ubuntu:~/cassandra/apache-cassandra-2.0.7$ bin/cassandra-cli
+Connected to: "Test Cluster" on 127.0.0.1/9160
+Welcome to Cassandra CLI version 2.0.7
+
+The CLI is deprecated and will be removed in Cassandra 3.0.  Consider migrating to cqlsh.
+CQL is fully backwards compatible with Thrift data; see http://www.datastax.com/dev/blog/thrift-to-cql3
+
+Type 'help;' or '?' for help.
+Type 'quit;' or 'exit;' to quit.
+
+[default@unknown] USE home_security;
+Authenticated to keyspace: home_security
+[default@home_security] LIST activity;
+Using default limit of 100
+Using default cell limit of 100
+-------------------
+RowKey: H01474777
+=> (name=2014-05-23 18\:28\:41-0700:, value=, timestamp=1428290494317000)
+=> (name=2014-05-23 18\:28\:41-0700:code_used, value=35353939, timestamp=1428290494317000)
+=> (name=2014-05-23 18\:28\:41-0700:event, value=616c61726d207475726e6564206f6666, timestamp=1428290494317000)
+=> (name=2014-05-23 07\:44\:23-0700:, value=, timestamp=1428290494301000)
+=> (name=2014-05-23 07\:44\:23-0700:code_used, value=35353939, timestamp=1428290494301000)
+=> (name=2014-05-23 07\:44\:23-0700:event, value=616c61726d20736574, timestamp=1428290494301000)
+=> (name=2014-05-22 17\:22\:15-0700:, value=, timestamp=1428290494293000)
+=> (name=2014-05-22 17\:22\:15-0700:code_used, value=35353939, timestamp=1428290494293000)
+=> (name=2014-05-22 17\:22\:15-0700:event, value=616c61726d207475726e6564206f6666, timestamp=1428290494293000)
+=> (name=2014-05-22 11\:44\:07-0700:, value=, timestamp=1428290494285000)
+=> (name=2014-05-22 11\:44\:07-0700:event, value=616c61726d207265736574206279206f6666696365, timestamp=1428290494285000)
+=> (name=2014-05-22 11\:25\:00-0700:, value=, timestamp=1428290494283000)
+=> (name=2014-05-22 11\:25\:00-0700:event, value=706f6c6963652063616c6c6564, timestamp=1428290494283000)
+=> (name=2014-05-22 11\:23\:59-0700:, value=, timestamp=1428290494279000)
+=> (name=2014-05-22 11\:23\:59-0700:event, value=616c61726d206272656163686564, timestamp=1428290494279000)
+=> (name=2014-05-22 07\:44\:13-0700:, value=, timestamp=1428290494257000)
+=> (name=2014-05-22 07\:44\:13-0700:code_used, value=35353939, timestamp=1428290494257000)
+=> (name=2014-05-22 07\:44\:13-0700:event, value=616c61726d20736574, timestamp=1428290494257000)
+=> (name=2014-05-21 18\:30\:33-0700:, value=, timestamp=1428290494247000)
+=> (name=2014-05-21 18\:30\:33-0700:code_used, value=35353939, timestamp=1428290494247000)
+=> (name=2014-05-21 18\:30\:33-0700:event, value=616c61726d207475726e6564206f6666, timestamp=1428290494247000)
+=> (name=2014-05-21 07\:32\:16-0700:, value=, timestamp=1428290494225000)
+=> (name=2014-05-21 07\:32\:16-0700:code_used, value=35353939, timestamp=1428290494225000)
+=> (name=2014-05-21 07\:32\:16-0700:event, value=616c61726d20736574, timestamp=1428290494225000)
+-------------------
+RowKey: H01033638
+=> (name=2014-05-22 07\:45\:28-0700:, value=, timestamp=1428290494259000)
+=> (name=2014-05-22 07\:45\:28-0700:code_used, value=32313231, timestamp=1428290494259000)
+********************************************************************************
+
+
+--------------------------------------------------------------------
+--------------------------------------------------------------------	
+------------ How data is stored on the disk ------------------------
+--------------------------------------------------------------------
+--------------------------------------------------------------------
+
+When data is written to a talbe in Cassandra, it goes to both a 
+commit log on disk (for playback, in case of node failure)
+and to memory (called memcache).
+
+Once the memcache for a table is full, it is flushed to disk, as an SSTable.
+For each table on each node, there is a memcache.
+
+################
+SSTable --> Sorted String Table
+################
+
+flush data from memecache to disk
+
+**************************************************
+bin/nodetool flush home_security;
+**************************************************
+
+bin/sstable2json /var/lib/cassandra/data/home_security/activity/home_security-activity-jb-1-Data.db
+
+
+--------------------------------------------------------------------
+--------------------------------------------------------------------	
+------------ Data Modeling in Cassandra ----------------------------
+--------------------------------------------------------------------
+--------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
