@@ -1,0 +1,152 @@
+------------------------------------------------------------
+------------------------------------------------------------
+--------------- HDFS command -------------------------------
+------------------------------------------------------------
+------------------------------------------------------------
+
+eric@eric-ubt:~/hadoop/data$ hadoop fs -copyToLocal hdfs://nn:10001/data/small/roman_britain.txt ./rb.txt
+eric@eric-ubt:~/hadoop/data$ tail rb.txt -n 100
+eric@eric-ubt:~/hadoop/sample_data$ hadoop fs -mkdir hdfs://nn:10001/data/big
+eric@eric-ubt:~/hadoop/sample_data$ hadoop fs -put ./weather hdfs://nn:10001/data/big
+
+
+The following command shows the system information, it is the
+same as we see on web UI.
+It first shows the information about the cluster and then
+about each of the data nodes.
+
+************************************************************
+eric@eric-ubt:~/hadoop/sample_data$ hadoop dfsadmin -report
+Configured Capacity: 154960711680 (144.32 GB)
+Present Capacity: 132115345408 (123.04 GB)
+DFS Remaining: 122737463296 (114.31 GB)
+DFS Used: 9377882112 (8.73 GB)
+DFS Used%: 7.1%
+Under replicated blocks: 0
+Blocks with corrupt replicas: 0
+Missing blocks: 0
+
+-------------------------------------------------
+Datanodes available: 3 (3 total, 0 dead)
+
+Name: 192.168.56.110:50010
+Decommission Status : Normal
+Configured Capacity: 51653570560 (48.11 GB)
+DFS Used: 3125960704 (2.91 GB)
+Non DFS Used: 7615115264 (7.09 GB)
+DFS Remaining: 40912494592(38.1 GB)
+DFS Used%: 6.05%
+DFS Remaining%: 79.21%
+Last contact: Tue Apr 07 21:58:12 EDT 2015
+
+
+Name: 192.168.56.111:50010
+Decommission Status : Normal
+Configured Capacity: 51653570560 (48.11 GB)
+DFS Used: 3125960704 (2.91 GB)
+Non DFS Used: 7614685184 (7.09 GB)
+DFS Remaining: 40912924672(38.1 GB)
+DFS Used%: 6.05%
+DFS Remaining%: 79.21%
+Last contact: Tue Apr 07 21:58:13 EDT 2015
+
+
+Name: 192.168.56.112:50010
+Decommission Status : Normal
+Configured Capacity: 51653570560 (48.11 GB)
+DFS Used: 3125960704 (2.91 GB)
+Non DFS Used: 7615565824 (7.09 GB)
+DFS Remaining: 40912044032(38.1 GB)
+DFS Used%: 6.05%
+DFS Remaining%: 79.2%
+Last contact: Tue Apr 07 21:58:10 EDT 2015
+************************************************************
+
+
+Set hdfs in safe mode, actually put the hdfs in readonly mode.
+Safe mode is useful when we do some upgrading, make sure taht
+no one can write data into the file system.
+************************************************************
+eric@eric-ubt:~/hadoop/sample_data$ hadoop dfsadmin -safemode enter
+Safe mode is ON
+eric@eric-ubt:~/hadoop/sample_data$ hadoop dfsadmin -safemode leave
+Safe mode is OFF
+************************************************************
+
+
+check the status of health of hdfs
+************************************************************
+eric@NN:~$ hadoop fsck -blocks
+FSCK started by eric from /192.168.56.100 for path / at Tue Apr 07 22:38:26 EDT 2015
+.......Status: HEALTHY
+ Total size:	3101497366 B
+ Total dirs:	7
+ Total files:	7
+ Total blocks (validated):	49 (avg. block size 63295864 B)
+ Minimally replicated blocks:	49 (100.0 %)
+ Over-replicated blocks:	0 (0.0 %)
+ Under-replicated blocks:	0 (0.0 %)
+ Mis-replicated blocks:		0 (0.0 %)
+ Default replication factor:	3
+ Average block replication:	3.0
+ Corrupt blocks:		0
+ Missing replicas:		0 (0.0 %)
+ Number of data-nodes:		3
+ Number of racks:		1
+FSCK ended at Tue Apr 07 22:38:26 EDT 2015 in 6 milliseconds
+************************************************************
+
+------------------------
+Hadoop Upgrading Process
+------------------------
+
+1. Shutdown cluster --> shutdown mapreduce, then shutdown hdfs
+2. Install new version of Hadoop
+3. Start HDFS with -upgrade option
+4. Check status with dfsadmin
+5. When status is complete:
+	1. put in safe mode
+	2. Use fsck to check health
+	3. Read some files
+6. Rollback if issues
+7. Finalize if successful
+
+
+------------------------------------------------------------
+------------------------------------------------------------
+--------------- Develop MapReduce Jobs ---------------------
+------------------------------------------------------------
+------------------------------------------------------------
+
+A MapReduce job includes
+
+1. Mapper
+2. Reducer
+3. Driver --> 	For configuration and execution of the job. It is the entry point
+		the main method where we set up all the job configurations and 
+		point the configurations to the Mapper, Reducers and even Combiners.
+
+
+
+
+--> Unit test
+	The whole idea behind the Unit test is that we write a wrapper around our implementation,
+	the mappers and reducers, and we just send a little bit of the data
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
