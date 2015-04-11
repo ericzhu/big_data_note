@@ -1,0 +1,90 @@
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+----------------- Nature Of Scala And Our First Worksheet----------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+In order to do anything in Eclipse, we have to create a project.
+
+There are a number of ways to work with simple things in Scala
+
+1.  REPL - Read Evaluate Print Loop
+    Right click project --> go to Sacala --> Select create scala interpreter.
+    We can pipe in single expression. It will evaluate them and print results.
+    When we run it in the eclipse, actually it is run in the classpath of the 
+    project. 
+    :q will quit the REPL
+
+2.  Worksheet
+
+3.  Run Scala script. 
+    When we run any scripting language, a important concept needs to be kept in
+    mind "Scripting Environment". "Scripting Environment" defines all the resource
+    that our scripting can access, it may be libraries, networking or IO utilities.
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+----------------- Overall Type Hierarchy --------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+Semicolon inference: Scala will check at the end of each line to see if a semicolon
+would work, and if it does, it sets one in there.
+
+** All types in scala start with capital letters
+** All types in scala are object types
+** Scala does not have any primitive types, as we have in Java
+
+Scala type hirachy
+
+Any --> AnyVal  --> Double
+                --> Float
+                --> Long
+                --> Int
+                --> Short
+                --> Byte
+                --> Unit
+                --> Boolean
+                --> Char
+                
+    --> AnyRef  --> Iterable    --> Seq     --> List
+                                            --> ArrayOps
+                                            --> StringOps
+                --> String
+                --> Array
+                --> Other Java or Scala classes
+                
+                
+** "Null" is a subclass of any AnyRef, any AnyRef type can be nullable.
+** "Nothing" is a subclass of any type including Null.
+
+Nothing is the bottom type the type hirachy. We can not create a object from Nothing.
+
+How can we get an object of Nothing. Actually when we throw an Exception, because
+when we throw an exception, we actually get nothing.
+
+**  This is needed in the TYPE SYSTEM. For example, in a funciton expected to return an Int,
+    but it throws an exception. Those are both possible outcomes. In order for the 
+    TYPE INFERENCE ENGINE to get an resonalbe answer, the function should return an Int. Nothing
+    is a subtype of Int.
+
+                
+** AnyVal corresponds to primitive in Java
+** AnyRef corresponds to object types in Java
+
+Scala is a functional programming language, any function must return something.
+If the a function does not return anyting, it return a Unit.
+
+Unit does not carry any information. Unit can be represented as ()
+    
+
+
+
+
+
+
+
+
+
+
+
+
