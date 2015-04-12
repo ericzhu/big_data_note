@@ -75,10 +75,225 @@ Scala is a functional programming language, any function must return something.
 If the a function does not return anyting, it return a Unit.
 
 Unit does not carry any information. Unit can be represented as ()
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+----------------- Memory Model, No Primitives, Val Versus Var And Tuples ------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+We can not go very far with any programming languages, if we can not bind a name
+to the value. This means define a varialbe.
+
+In scala we declare a variable with keyword val or var
+
+**  val defines non changeable REFERENCE
+**  var defines a reference that can be changed.
+
+**  Scala does LOCAL VARIABLE INFERENCE, we never need to specify explicitly the type
+    when defining a varialbe
+
+**  In Java val equals to "final variable", and var equals to "non final varialbe".
+
+**  In scala we should prefer val, only use var when we need to change the object
+    that varialble reference to.
+
+In C# we can use var to declare a variabble. var in C# means type inference.
+
+**  we can not declare a val without assigning a vlaue. - var a - is invalid
+
+**  variable pattern - val (a, b) = (3, 5)
+    The parenthese we put after val is call patterns. 
+    When we define a varialbe we can give it a pattern.
+    The above pattern is called tuples.
     
+    Scala comes with built-in tuples. Tuple is useful when we want to simple 
+    groupe serveral values. For example, we may want to return serveral values
+    in a function.
 
 
+*******************************************************************************
+object worksheet01 {
+  println("Welcome to the Scala worksheet")       //> Welcome to the Scala worksheet
+  
+  4                                               //> res0: Int(4) = 4
+  (4.5).toString                                  //> res1: String = 4.5
+  (4.5).toInt                                     //> res2: Int = 4
+  "4.6".toDouble                                  //> res3: Double = 4.6
+  null                                            //> res4: Null(null) = null
+  ()
+  var x, y, z = 0                                 //> x  : Int = 0
+                                                  //| y  : Int = 0
+                                                  //| z  : Int = 0
+  val (a, b) = (2, 4)                             //> a  : Int = 2
+                                                  //| b  : Int = 4
+  
+  (a, b)                                          //> res5: (Int, Int) = (2,4)
+  
+  (1, 4, "abc")                                   //> res6: (Int, Int, String) = (1,4,abc)
+  
+  true                                            //> res7: Boolean(true) = true
+  Unit                                            //> res8: Unit.type = object scala.Unit
+}
+*******************************************************************************
 
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+----------------- If Expressions ----------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+In Scala, if block is an expression, it is different from the one in Java. 
+In Java, if block is a statement, it does something but does not return anything.
+But in Scala, if block return a value.
+
+*******************************************************************************
+object worksheet01 {
+	val a = 10                                //> a  : Int = 10
+	
+	if(a > 11) {
+		true
+	} else {
+		"Not True"
+	}                                         //> res0: Any = Not True
+	
+	if(a > 9) {
+		true
+	} else {
+		"Not True"
+	}                                         //> res1: Any = true
+}
+*******************************************************************************
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+----------------- Match Expressions -------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+In someway, match and switch are similar, but match is far more powerful.
+
+*******************************************************************************
+object worksheet01 {
+	val num = 4                               //> num  : Int = 4
+	val n = 4                                 //> n  : Int = 4
+	
+	num match {
+		case 0 => "zero"
+		case 1 => "one"
+		case _ => "something else"
+	}                                         //> res2: String = something else
+	
+	num * 5 match {
+		case 0 => "Zero"
+		case 8 => "Eight"
+		case 'n' => "The value is 4"
+		case i => "The value is: " + i
+	}                                         //> res3: String = The value is: 20
+	
+	(num * 5, a) match {
+		case (3, _) => "First line"
+		case (_, _) => "Any two value tuple"
+	}                                         //> res4: String = Any two value tuple
+}
+*******************************************************************************
+
+
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+----------------- Recursion, Tail Recursion, And Nesting Functions - part 1------------
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+
+** Recursion is used a lot more in functional programming languages.
+
+*******************************************************************************
+object worksheet01 {
+	def square(x:Double):Double = x * x       //> square: (x: Double)Double
+	
+	square(5.9)                               //> res0: Double = 34.81
+	
+	def greet1(name:String):Unit = {
+		println(s"Hello $name")
+	}                                         //> greet1: (name: String)Unit
+	
+	def greet2(name:String) {
+		println(s"Hello $name")
+	}                                         //> greet2: (name: String)Unit
+	
+	greet1("Eric")                            //> Hello Eric
+	
+	greet2("John")                            //> Hello John
+	
+}
+*******************************************************************************
+
+
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+----------------- Recursion, Tail Recursion, And Nesting Functions - part 2------------
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------    
+
+**  In non functional languages we often use loops, in functional languages, instead, we
+    use recursion.
+
+*******************************************************************************
+object worksheet01 {
+	def factorial(n:Int):Int = {
+		if(n == 0) {
+			1
+		} else {
+			n * factorial(n - 1)
+		}
+	}                                         //> factorial: (n: Int)Int
+	
+	factorial(3)                              //> res1: Int = 6
+	
+	def estimatePi(n:Int):Double = {
+	
+			def helper(n:Int):Double = {
+				if(n < 1) 0 else {
+					val x = Math.random();
+					val y = Math.random();
+					(if((x*x + x*y) <= 1) 1 else 0) + helper(n - 1)
+				}
+			}
+		4 * helper(n)/n
+	}                                         //> estimatePi: (n: Int)Double
+	
+	estimatePi(20000)                         //> java.lang.StackOverflowError
+                                                  //| 	at java.util.Random.nextDouble(Random.java:444)
+                                                  //| 	at java.lang.Math.random(Math.java:716)
+                                                  //| 	at worksheet01$$anonfun$main$1.helper$1(worksheet01.scala:33)
+                                                  //| 	at worksheet01$$anonfun$main$1.helper$1(worksheet01.scala:35)
+                                                  //| 	at worksheet01$$anonfun$main$1.helper$1(worksheet01.scala:35)
+                                                  //| 	at worksheet01$$anonfun$main$1.helper$1(worksheet01.scala:35)
+                                                  //| 	at worksheet01$$anonfun$main$1.helper$1(worksheet01.scala:35)
+                                                  //| 	at worksheet01$$anonfun$main$1.helper$1(worksheet01.scala:35)
+                                                  //| 	at worksheet01$$anonfun$main$1.helper$1(worksheet01.scala:35)
+                                                  //| 	at worksheet01$$anonfun$main$1.helper$1(worksheet01.scala:35)
+                                                  //| 	at worksheet01$$anonfun$main$1.helper$1(worksheet01.scala:35)
+                                                  //| 	at worksheet01$$anonfun$main$1.helper$1(worksheet01.scala:35)
+                                                  //| 	at worksheet01$$anonfun$main$1.helper$1(worksheet01.scala:35)
+                                                  //| 	at worksheet01$$anonfun$main$1.helper$1(worksheet01.scala:35)
+                                                  //| 	at worksheet01$$anonfun$main$1.helper$1(works
+                                                  //| Output exceeds cutoff limit.
+	
+	def estimatePiTailRecursive(n :Int) :Double = {
+	
+		def helper(n :Int, sum :Double) :Double = if(n < 1) sum else {
+			val x = Math.random();
+			val y = Math.random();
+			helper(n - 1, sum + (if((x*x + y*y) <= 1) 1 else 0 ))
+		}
+		helper(n, 0.0) / n * 4
+	}
+	
+	estimatePiTailRecursive(100000)
+}
+*******************************************************************************
 
 
 
