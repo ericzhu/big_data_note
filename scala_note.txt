@@ -241,6 +241,23 @@ object worksheet01 {
 
 *******************************************************************************
 object worksheet01 {
+	def square(x:Double):Double = x * x       //> square: (x: Double)Double
+	
+	square(5.9)                               //> res0: Double = 34.81
+	
+	def greet1(name:String):Unit = {
+		println(s"Hello $name")
+	}                                         //> greet1: (name: String)Unit
+	
+	def greet2(name:String) {
+		println(s"Hello $name")
+	}                                         //> greet2: (name: String)Unit
+	
+	greet1("Eric")                            //> Hello Eric
+	
+	greet2("John")                            //> Hello John
+	
+	// Factorial calculator with recursion
 	def factorial(n:Int):Int = {
 		if(n == 0) {
 			1
@@ -251,6 +268,18 @@ object worksheet01 {
 	
 	factorial(3)                              //> res1: Int = 6
 	
+	// Factorial calculator with TAIL RECURSION
+	def factorial2(n :Int, result :Int) :Int = {
+		if(n == 0)
+			return result
+		else
+			factorial2(n - 1, result * n)
+	}                                         //> factorial2: (n: Int, result: Int)Int
+	
+	factorial2(10, 1)                         //> res2: Int = 3628800
+	
+	
+	// Estimate PI with recursion
 	def estimatePi(n:Int):Double = {
 	
 			def helper(n:Int):Double = {
@@ -263,24 +292,9 @@ object worksheet01 {
 		4 * helper(n)/n
 	}                                         //> estimatePi: (n: Int)Double
 	
-	estimatePi(20000)                         //> java.lang.StackOverflowError
-                                                  //| 	at java.util.Random.nextDouble(Random.java:444)
-                                                  //| 	at java.lang.Math.random(Math.java:716)
-                                                  //| 	at worksheet01$$anonfun$main$1.helper$1(worksheet01.scala:33)
-                                                  //| 	at worksheet01$$anonfun$main$1.helper$1(worksheet01.scala:35)
-                                                  //| 	at worksheet01$$anonfun$main$1.helper$1(worksheet01.scala:35)
-                                                  //| 	at worksheet01$$anonfun$main$1.helper$1(worksheet01.scala:35)
-                                                  //| 	at worksheet01$$anonfun$main$1.helper$1(worksheet01.scala:35)
-                                                  //| 	at worksheet01$$anonfun$main$1.helper$1(worksheet01.scala:35)
-                                                  //| 	at worksheet01$$anonfun$main$1.helper$1(worksheet01.scala:35)
-                                                  //| 	at worksheet01$$anonfun$main$1.helper$1(worksheet01.scala:35)
-                                                  //| 	at worksheet01$$anonfun$main$1.helper$1(worksheet01.scala:35)
-                                                  //| 	at worksheet01$$anonfun$main$1.helper$1(worksheet01.scala:35)
-                                                  //| 	at worksheet01$$anonfun$main$1.helper$1(worksheet01.scala:35)
-                                                  //| 	at worksheet01$$anonfun$main$1.helper$1(worksheet01.scala:35)
-                                                  //| 	at worksheet01$$anonfun$main$1.helper$1(works
-                                                  //| Output exceeds cutoff limit.
+	estimatePi(200)                           //> res3: Double = 3.2
 	
+	// Estimate PI with tail recursion
 	def estimatePiTailRecursive(n :Int) :Double = {
 	
 		def helper(n :Int, sum :Double) :Double = if(n < 1) sum else {
@@ -289,9 +303,18 @@ object worksheet01 {
 			helper(n - 1, sum + (if((x*x + y*y) <= 1) 1 else 0 ))
 		}
 		helper(n, 0.0) / n * 4
-	}
+	}                                         //> estimatePiTailRecursive: (n: Int)Double
 	
-	estimatePiTailRecursive(100000)
+	estimatePiTailRecursive(100000)           //> res4: Double = 3.14928
+	
+	
+	def printHello() = println("Hello")       //> printHello: ()Unit
+	
+	printHello                                //> Hello
+	
+	printHello == ()                          //> Hello
+                                                  //| res5: Boolean = true
+	
 }
 *******************************************************************************
 
