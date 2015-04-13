@@ -319,6 +319,74 @@ object worksheet01 {
 *******************************************************************************
 
 
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+----------------- Collections Overview ----------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+Scala has its own sets of powerful libraries in addition to the Java libraries.
+
+Collection Hirachy
+
+--> Traversable     --> Iterable    --> Set     --> BitSet
+                                                --> SortedSet
+                                                
+                                    --> Seq     --> IndexedSeq
+                                                --> LinearSeq
+                                                
+                                    --> Map     
+
+** IndexedSeq, we can jump to a specific element directly
+** LinearSeq, we have to go one by one.
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+----------------- Sequences - Array, List, Vector, And Buffer -----------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+an Array in Scala is compiled down to a Java array.
+
+** Array content is mutable
+** List content is immutable
+
+In Scala, when assign a value to actually we call a method on that object.
+
+List in Scala is singly list, so it is very slow to access a specific element.
+
+*******************************************************************************
+object collections {
+  println("Welcome to the Scala worksheet")       //> Welcome to the Scala worksheet
+  
+  val arr = Array(1, 2, 3)                        //> arr  : Array[Int] = Array(1, 2, 3)
+  val lst = List(2, 4, 3.4)                       //> lst  : List[Double] = List(2.0, 4.0, 3.4)
+  arr(1)                                          //> res0: Int = 2
+  
+  arr(1) = 10
+  
+  val lst1 = arr :: lst                           //> lst1  : List[Any] = List(Array(1, 10, 3), 2.0, 4.0, 3.4)
+  val lst2 = 90 :: lst                            //> lst2  : List[AnyVal] = List(90, 2.0, 4.0, 3.4)
+}
+*******************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
